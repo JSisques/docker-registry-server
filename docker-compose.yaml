@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  docker-registry:
+    image: registry:latest
+    container_name: docker-registry-server
+    hostname: docker-registry-server
+    ports:
+      - "5000:5000"
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+    volumes:
+      - ./data:/data
+      - ./auth:/auth
+    networks:
+      - default
+    restart: unless-stopped
+
+  docker-registry-ui:
+    image: jc21/registry-ui:latest
+    container_name: docker-registry-ui
+    hostname: docker-registry-ui
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - REGISTRY_HOST=docker-registry-server:5000
+      - REGISTRY_SSL=false
+      - REGISTRY_DOMAIN=docker-registry-server:5000
+      - REGISTRY_STORAGE_DELETE_ENABLED=
+      - REGISTRY_USER=$2a$10$Jt/8M35QMA25MW8w784Uc
+      - REGISTRY_PASS=qOMc8DDecOLxhlPaPTTRSqirxNrgtYW
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
